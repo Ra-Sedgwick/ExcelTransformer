@@ -24,15 +24,30 @@ namespace ExcelTrasnformer.Business
             Worksheet sheet = wb.Worksheets[0];
 
             // Consolidate Date Range
+            List<int> lengthInDays = new List<int>();
+            List<DateTime> statusChanged = new List<DateTime>();
+
             List<double> deadlineUnix = GetColumn<double>(1, 7, sheet);
-            List<double> satusChangeUnix = GetColumn<double>(1, 8, sheet); 
+            List<double> statusChangedUnix = GetColumn<double>(1, 8, sheet); 
             List<double> launchUnix = GetColumn<double>(1, 9, sheet);
 
-            List<DateTime> deadline = deadlineUnix.Select(date => 
-                DateTimeOffset.FromUnixTimeSeconds( (long) date)
-                .UtcDateTime)
-                .ToList(); 
+            for (int i = 0; i < deadlineUnix.Count; i++)
+            {
+                // duration = deadline(seconds) - launch(seconds)
+                // duration; seconds => days
+                double lengthSeconds =  deadlineUnix[i] - launchUnix[i];
+                int lengthDays = (int)lengthSeconds / 60 / 60 / 24;
 
+                lengthInDays.Add(lengthDays);
+
+                // Unix => Utc
+                DateTime date = DateTimeOffset.FromUnixTimeSeconds((long)statusChangedUnix[i])
+                    .UtcDateTime;
+
+                statusChanged.Add(date); 
+            }
+
+            
             
        
 
