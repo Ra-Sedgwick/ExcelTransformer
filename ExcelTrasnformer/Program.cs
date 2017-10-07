@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Aspose.Cells;
+using ExcelTrasnformer.Business;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +12,9 @@ namespace ExcelTrasnformer
     {
         static void Main(string[] args)
         {
+            ExcelUtility  excel = new ExcelUtility();
+            Workbook workBook = excel.FileReader("C:/Data/train.xlsx");
+            Console.ReadKey();
         }
     }
 }
