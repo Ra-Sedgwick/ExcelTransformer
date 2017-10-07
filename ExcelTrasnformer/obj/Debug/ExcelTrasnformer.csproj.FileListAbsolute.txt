@@ -11,3 +11,4 @@ C:\Users\rased\projects\ExcelTrasnformer\ExcelTrasnformer\obj\Debug\ExcelTrasnfo
 C:\Users\rased\projects\ExcelTrasnformer\ExcelTrasnformer\obj\Debug\ExcelTrasnformer.csproj.CoreCompileInputs.cache
 C:\Users\rased\projects\ExcelTrasnformer\ExcelTrasnformer\obj\Debug\ExcelTrasnformer.exe
 C:\Users\rased\projects\ExcelTrasnformer\ExcelTrasnformer\obj\Debug\ExcelTrasnformer.pdb
+C:\Users\rased\projects\ExcelTrasnformer\ExcelTrasnformer\bin\Debug\Newtonsoft.Json.dll
