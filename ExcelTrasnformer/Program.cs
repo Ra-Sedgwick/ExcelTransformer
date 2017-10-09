@@ -13,7 +13,8 @@ namespace ExcelTrasnformer
         static void Main(string[] args)
         {
             ExcelUtility  excel = new ExcelUtility();
-            Workbook workBook = excel.FileReader("C:/Data/train.xlsx");
+            Workbook workBook = excel.TransformWorkbook("C:/Data/train.xlsx");
+
             Console.ReadKey();
         }
     }

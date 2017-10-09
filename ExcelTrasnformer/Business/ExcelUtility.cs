@@ -15,44 +15,67 @@ namespace ExcelTrasnformer.Business
 {
     public class ExcelUtility
     {
-    public Workbook FileReader(String filePath)
+    public Workbook TransformWorkbook(String filePath)
         {
+            #region File Work
+
             Workbook wb = GetWorkBook(filePath);
 
             if (wb == null)
-            {
                 throw new FileNotFoundException();
-            }
 
             Worksheet sheet = wb.Worksheets[0];
 
+            #endregion
+
             #region Date Consoliation
             // Consolidate Date Range
-            List<int> lengthInDays = new List<int>();
+            List<double> lengthInDays = new List<double>();
             List<DateTime> statusChanged = new List<DateTime>();
+            List<DateTime> deadline = new List<DateTime>();
+            List<DateTime> launch = new List<DateTime>();
 
             List<double> deadlineUnix = GetColumn<double>(1, 7, sheet);
             List<double> statusChangedUnix = GetColumn<double>(1, 8, sheet);
             List<double> launchUnix = GetColumn<double>(1, 9, sheet);
+            DateTime date;
+            DateTime deadlineDate;
+            DateTime launchDate;
 
             for (int i = 0; i < deadlineUnix.Count; i++)
             {
                 // duration = deadline(seconds) - launch(seconds)
                 // duration; seconds => days
-                double lengthSeconds = deadlineUnix[i] - launchUnix[i];
-                int lengthDays = (int)lengthSeconds / 60 / 60 / 24;
+                //double lengthSeconds = deadlineUnix[i] - launchUnix[i];
+                //int lengthDays = (int)lengthSeconds / 60 / 60 / 24;
 
-                lengthInDays.Add(lengthDays);
+                //lengthInDays.Add(lengthDays);
 
                 // Unix => Utc
-                DateTime date = DateTimeOffset.FromUnixTimeSeconds((long)statusChangedUnix[i])
+                date = DateTimeOffset.FromUnixTimeSeconds((long)statusChangedUnix[i])
                     .UtcDateTime;
 
                 statusChanged.Add(date);
+
+                deadlineDate = DateTimeOffset.FromUnixTimeSeconds((long)deadlineUnix[i])
+                                    .UtcDateTime;
+
+                deadline.Add(deadlineDate);
+
+                launchDate = DateTimeOffset.FromUnixTimeSeconds((long)launchUnix[i])
+                    .UtcDateTime;   
+
+                launch.Add(launchDate);
+
+                lengthInDays.Add((deadlineDate - launchDate).TotalDays); 
+
             }
+
+
             #endregion
 
             #region Currency Consolidation
+
             List<String> currencys = GetColumn<String>(1, 6, sheet);
             List<int> goalAmounts = GetColumn<int>(1, 3, sheet);
             List<decimal> normalizedAmounts = new List<decimal>();
@@ -73,30 +96,29 @@ namespace ExcelTrasnformer.Business
                 normalizedAmounts.Add(newAmount); 
 
             }
-            //Cell c;
-            //for (int i = 1; i < 98613; i++)
-            //{
-            //    c = sheet.Cells[i, 3];
-            //    c.PutValue(c.IntValue);
-            //    if (i % 25 == 0)
-            //        Console.WriteLine(c.Value);
-
-            //}
-
-            //wb.Save(filePath + "alt");
-
-            //<int> goals = GetColumn<int>(1, 3, sheet);
-
-
-
-           // decimal rate = (decimal)json["rates"]["AUD"];
 
 
             #endregion
+            sheet.Cells[0, 13].Value = "Length";
+            for (int i = 1; i < lengthInDays.Count; i++)
+            {
+                sheet.Cells[i, 13].Value = lengthInDays[i - 1]; 
+                
+                if (!sheet.Cells[i, 6].Equals("USD"))
+                {
+                    sheet.Cells[i, 6].Value = "USD";
+                    sheet.Cells[i, 3].Value = normalizedAmounts[i - 1]; 
+                }
+
+                sheet.Cells[i, 8].Value = statusChanged[i - 1];
+                sheet.Cells[i, 7].Value = deadline[i - 1];
+                sheet.Cells[i, 9].Value = launch[i - 1]; 
+
+            }
 
 
-
-
+            String newFileName = filePath.Split('.')[0] + "-formatted-Alt.xlsx";
+            wb.Save(newFileName);
 
             return wb; 
         }
@@ -110,7 +132,7 @@ namespace ExcelTrasnformer.Business
             return JObject.Parse(jsonString);
         }
 
-        //TODO: Handle Generic Data Type. 
+        // Read in column of spreadsheet to list. 
         private List<T> GetColumn<T>(int rowIndex, int columnIndex, Worksheet sheet)
         {
             List<T> column = new List<T>();
